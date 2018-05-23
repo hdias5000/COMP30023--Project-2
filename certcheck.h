@@ -58,11 +58,11 @@ int validate_date(X509 *cert);
 
 /*Checks if given Domain Name from CSV file is same as the Common Name given in
 the certificate(also checks for wildcards).*/
-int validate_CN(const char *hostname, const X509 *server_cert);
+int validate_CN(const char *hostname, X509 *server_cert);
 
 /*Checks if given Domain Name from CSV file is same as any of the Alternative
 Subject Names(Common Name) given in the certificate(checks for wildcards).*/
-int validate_SAN(const char *hostname, const X509 *server_cert);
+int validate_SAN(const char *hostname, X509 *server_cert);
 
 /*When given the hostname and wildcard, checks if the hostname is similar.*/
 int check_wildcards(const char* hostname, char* dns);

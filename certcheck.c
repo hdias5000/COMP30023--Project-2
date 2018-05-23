@@ -32,7 +32,7 @@ NODE* read_CSVfile(NODE *head, const char* filename){
 
     //checks if file read correctly
     if(fstream == NULL){
-        fprintf(stderr, "Error in reading CSV filename");
+        fprintf(stderr, "Error in reading CSV filename\n");
         exit(EXIT_FAILURE);
     }
 
@@ -102,13 +102,13 @@ X509* read_certificate(X509 *cert, char* certificate){
 
     //reads certificate into BIO
     if (!(BIO_read_filename(cert_bio, certificate))){
-        fprintf(stderr, "Error in reading cert BIO filename");
+        fprintf(stderr, "Error in reading cert BIO filename\n");
         exit(EXIT_FAILURE);
     }
 
     //loads certificate from bio
     if (!(cert = PEM_read_bio_X509(cert_bio, NULL, 0, NULL))){
-        fprintf(stderr, "Error in loading certificate");
+        fprintf(stderr, "Error in loading certificate\n");
         exit(EXIT_FAILURE);
     }
     return cert;
@@ -134,7 +134,7 @@ int validate_date(X509 *cert){
     return 1;
 }
 
-int validate_CN(const char *hostname, const X509 *server_cert) {
+int validate_CN(const char *hostname, X509 *server_cert) {
 	int cn_location = -1;
 	X509_NAME_ENTRY *cn_entry = NULL;
 	ASN1_STRING *cn_asn1 = NULL;
@@ -142,23 +142,23 @@ int validate_CN(const char *hostname, const X509 *server_cert) {
 
 	//finds the position of the Common Name field in the Subject field of the
     //certificate
-	cn_location = X509_NAME_get_index_by_NID(X509_get_subject_name(server_cert,
+	cn_location = X509_NAME_get_index_by_NID(X509_get_subject_name(server_cert),
         NID_commonName, -1);
 	if (cn_location < 0) {
-        fprintf(stderr, "Error in finding position of Common Name");
+        fprintf(stderr, "Error in finding position of Common Name\n");
 		return 0;
 	}
 
 	//extract the Common Name field
-	if (!(cn_entry = X509_NAME_get_entry(X509_get_subject_name(server_cert,
-        cn_location)))) {
-        fprintf(stderr, "Error in extracting Common Name");
+	if (!(cn_entry = X509_NAME_get_entry(X509_get_subject_name(server_cert),
+        cn_location))) {
+        fprintf(stderr, "Error in extracting Common Name\n");
 		return 0;
 	}
 
 	//convert the Common Name field to a string
 	if (!(cn_asn1 = X509_NAME_ENTRY_get_data(cn_entry))) {
-        fprintf(stderr, "Error in converting Common Name field to string");
+        fprintf(stderr, "Error in converting Common Name field to string\n");
 		return 0;
 	}
 	cn_string = (char *) ASN1_STRING_data(cn_asn1);
@@ -169,7 +169,7 @@ int validate_CN(const char *hostname, const X509 *server_cert) {
     return 0;
 }
 
-int validate_SAN(const char *hostname, const X509 *server_cert) {
+int validate_SAN(const char *hostname, X509 *server_cert) {
 	int i;
 	int san_count = -1;
 	STACK_OF(GENERAL_NAME) *san_list = NULL;
@@ -177,7 +177,7 @@ int validate_SAN(const char *hostname, const X509 *server_cert) {
 	//extracts the names within the SAN extension from the certificate
 	if (!(san_list = X509_get_ext_d2i(server_cert, NID_subject_alt_name, NULL,
         NULL))) {
-		fprintf(stderr, "Error in extracting SAN");
+		fprintf(stderr, "SAN does not exist/Error in extracting SAN\n");
         return 0;
 	}
 	san_count = sk_GENERAL_NAME_num(san_list);
@@ -225,13 +225,13 @@ int validate_RSA_key_length(X509 *cert){
 
     //extracts(decodes) the public key from the certificate
     if (!(public_key = X509_get_pubkey(cert))) {
-		fprintf(stderr, "Error in extracting Public Key");
+		fprintf(stderr, "Error in extracting Public Key\n");
         return 0;
 	}
 
     //extracts the referenced key in public_key
     if (!(rsa_key = EVP_PKEY_get1_RSA(public_key))) {
-		fprintf(stderr, "Error in extracting RSA key");
+		fprintf(stderr, "Error in extracting RSA key\n");
         return 0;
 	}
 
@@ -251,7 +251,7 @@ int validate_basic_constraints(X509 *cert){
 
     //extracts the Basic Constrainsts extension
     if (!(bc = X509_get_ext_d2i(cert, NID_basic_constraints, NULL, NULL))) {
-		fprintf(stderr, "Error in extracting Basic Constrainsts");
+		fprintf(stderr, "Error in extracting Basic Constrainsts\n");
         return 0;
 	}
 
@@ -270,7 +270,7 @@ int validate_extended_key_usage(X509 *cert){
 
     //extracts the Extended Key Usage extension
     if (!(ext_key_usage = X509_get_ext_d2i(cert, NID_ext_key_usage,NULL, NULL))) {
-		fprintf(stderr, "Error in extracting Extended Key Usage");
+		fprintf(stderr, "Error in extracting Extended Key Usage\n");
         return 0;
 	}
 
@@ -278,13 +278,13 @@ int validate_extended_key_usage(X509 *cert){
     while (sk_ASN1_OBJECT_num(ext_key_usage) > 0){
         //extracts the Extended Key Usage ValueID
         if (!(valueID = OBJ_obj2nid(sk_ASN1_OBJECT_pop(ext_key_usage)))) {
-    		fprintf(stderr, "Error in extracting Extended Key Usage ValueID");
+    		fprintf(stderr, "Error in extracting Extended Key Usage ValueID\n");
             return 0;
     	}
 
         //extracts the Extended Key Usage extension
         if (!(extku_value = OBJ_nid2sn(valueID))) {
-    		fprintf(stderr, "Error in extracting Extended Key Usage Value");
+    		fprintf(stderr, "Error in extracting Extended Key Usage Value\n");
             return 0;
     	}
 
@@ -298,7 +298,7 @@ int validate_extended_key_usage(X509 *cert){
 void write_to_file(NODE *data) {
     FILE *f = fopen(FILENAME_TO_WRITE, "w");
     if (f == NULL){
-        fprintf(stderr, "Error in writing CSV filename");
+        fprintf(stderr, "Error in writing CSV filename\n");
         exit(EXIT_FAILURE);
     }
     while (data) {

@@ -1,4 +1,4 @@
-# Assignment 2
+# Assignment 2 - COMP30023
 This repository contains example code and test scripts for Assignment 2
 
 ## Example Certificate Code
